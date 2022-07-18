@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-cm-env-pod-5
+spec:
+  containers:
+    - name: app-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "ls -lh /etc/config/ ; cat /etc/config/var1 ; echo '\n' ; cat /etc/config/var2 ; echo '\n'" ]
+      volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        name: app-config-volume
+  restartPolicy: Never
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-cm-env-pod-5-2
+spec:
+  containers:
+    - name: app-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh","-c","ls -lh /etc/config/path/to/ ; cat /etc/config/path/to/special-key ; echo '\n'" ]
+      volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        name: app-config-volume
+        items:
+        - key: var1
+          path: path/to/special-key
+  restartPolicy: Never

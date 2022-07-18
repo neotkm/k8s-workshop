@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-cm-env-pod-3-ok
+spec:
+  containers:
+    - name: app-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      env:
+        - name: SPECIAL_LEVEL_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: nonexistent-cm
+              key: nonexistent-key
+              optional: true
+  restartPolicy: Never
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-cm-env-pod-3-not-ok
+spec:
+  containers:
+    - name: app-container
+      image: gcr.io/google_containers/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      env:
+        - name: SPECIAL_LEVEL_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: nonexistent-cm
+              key: nonexistent-key
+              optional: false
+  restartPolicy: Never

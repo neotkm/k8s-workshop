@@ -1,0 +1,68 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-ingress-basic-auth
+  labels:
+    app: demo-ingress-basic-auth
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: demo-ingress-basic-auth
+  template:
+    metadata:
+      labels:
+        app: demo-ingress-basic-auth
+    spec:
+      containers:
+      - name: demo-ingress-basic-auth
+        image: neotkm/pod-healthcheck:v0.05
+        env:
+          - name: PORT
+            value: "2020"
+          - name: MESSAGE
+            value: "LOGIN SUCCESSFUL"
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: demo-ingress-basic-auth
+spec:
+  selector:
+    app: demo-ingress-basic-auth
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 2020
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress-basic-auth
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - foo'
+spec:
+  tls:
+  - hosts:
+    - foo.bar.com
+    secretName: foo-secret
+  rules:
+  - host: foo.bar.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: demo-ingress-basic-auth
+            port:
+              number: 80
+  ingressClassName: nginx

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-cm-env-pod-2
+spec:
+  containers:
+    - name: app-container
+      image: gcr.io/google_containers/busybox
+      command:  ["/bin/sh", "-c", "env"]
+      env:
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config-env-file
+              key: database-name
+  restartPolicy: Never
