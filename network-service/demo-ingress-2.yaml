@@ -1,0 +1,167 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-ingress-app-2
+  labels:
+    app: demo-ingress-app-2
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: demo-ingress-app-2
+  template:
+    metadata:
+      labels:
+        app: demo-ingress-app-2
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: demo-ingress-app-2
+          image: "neotkm/pod-healthcheck:v0.05"
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /ws/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /ws/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+            - name: PORT
+              value: "8080"
+            - name: MESSAGE
+              value: "Tea"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-ingress-app-2
+  labels:
+    app: demo-ingress-app-2
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: demo-ingress-app-2
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-ingress-app-3
+  labels:
+    app: demo-ingress-app-3
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: demo-ingress-app-3
+  template:
+    metadata:
+      labels:
+        app: demo-ingress-app-3
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: demo-ingress-app-3
+          image: "neotkm/pod-healthcheck:v0.05"
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /ws/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /ws/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+            - name: PORT
+              value: "8080"
+            - name: MESSAGE
+              value: "Сoffee"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-ingress-app-3
+  labels:
+    app: demo-ingress-app-3
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: demo-ingress-app-3
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress-app-2
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  labels:
+    app: demo-ingress-app-2
+spec:
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /tea
+        pathType: Exact
+        backend:
+          service:
+            name: demo-ingress-app-2
+            port:
+              number: 8080
+      - path: /coffee
+        pathType: Prefix
+        backend:
+          service:
+            name: demo-ingress-app-3
+            port:
+              number: 8080
+  ingressClassName: nginx
