@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-svc-headless-with-selector
+  labels:
+    app: demo-svc-headless-with-selector
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: demo-svc-headless-with-selector
+  template:
+    metadata:
+      labels:
+        app: demo-svc-headless-with-selector
+    spec:
+      containers:
+      - name: demo-svc-headless-with-selector
+        image: neotkm/pod-healthcheck:v0.05
+        env:
+          - name: PORT
+            value: "2020"
+          - name: MESSAGE
+            value: "demo-svc-headless-with-selector"
+        imagePullPolicy: IfNotPresent
+
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: demo-svc-headless-with-selector
+spec:
+  clusterIP: None
+  selector:
+    app: demo-svc-headless-with-selector
+  ports:
+    - protocol: TCP
+      port: 2020

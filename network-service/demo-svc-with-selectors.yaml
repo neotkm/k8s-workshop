@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc-selector-app
+  labels:
+    app: svc-selector-app
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: svc-selector-app
+  template:
+    metadata:
+      labels:
+        app: svc-selector-app
+    spec:
+      containers:
+      - name: svc-selector-app
+        image: neotkm/pod-healthcheck:v0.05
+        env:
+          - name: PORT
+            value: "2020"
+          - name: MESSAGE
+            value: "svc-selector-app"
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: svc-selector-app
+spec:
+  selector:
+    app: svc-selector-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 2020

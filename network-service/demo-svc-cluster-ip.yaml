@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-svc-cluster-ip
+  labels:
+    app: demo-svc-cluster-ip
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: demo-svc-cluster-ip
+  template:
+    metadata:
+      labels:
+        app: demo-svc-cluster-ip
+    spec:
+      containers:
+      - name: demo-svc-cluster-ip
+        image: neotkm/pod-healthcheck:v0.05
+        env:
+          - name: PORT
+            value: "2022"
+          - name: MESSAGE
+            value: "cluster-ip-svc"
+        imagePullPolicy: IfNotPresent
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: demo-svc-cluster-ip
+spec:
+  selector:
+    app: demo-svc-cluster-ip
+  internalTrafficPolicy: Cluster
+#  externalTrafficPolicy: Local
+  sessionAffinity: ClientIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 2022

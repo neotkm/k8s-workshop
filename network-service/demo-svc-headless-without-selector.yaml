@@ -1,0 +1,12 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: demo-svc-headless-without-selector
+spec:
+  clusterIP: None
+  selector:
+    app: demo-svc-headless-without-selector
+  ports:
+    - protocol: TCP
+      port: 2020

@@ -1,0 +1,89 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-svc-external-ips
+spec:
+  selector:
+    app: demo-svc-external-ips
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 2020
+  externalIPs:
+    - 5.188.138.14
+    - 5.188.138.67
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-svc-external-ips2
+spec:
+  selector:
+    app: demo-svc-external-ips-2
+  ports:
+    - name: http
+      protocol: TCP
+      port: 81
+      targetPort: 2020
+  externalIPs:
+    - 5.188.138.14
+    - 5.188.138.67
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-svc-external-ips
+  labels:
+    app: demo-svc-external-ips
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: demo-svc-external-ips
+  template:
+    metadata:
+      labels:
+        app: demo-svc-external-ips
+    spec:
+      containers:
+      - name: demo-ingress-basic-auth
+        image: neotkm/pod-healthcheck:v0.05
+        env:
+          - name: PORT
+            value: "2020"
+          - name: MESSAGE
+            value: "demo-svc-external-ips"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-svc-external-ips-2
+  labels:
+    app: demo-svc-external-ips-2
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: demo-svc-external-ips-2
+  template:
+    metadata:
+      labels:
+        app: demo-svc-external-ips-2
+    spec:
+      containers:
+      - name: demo-ingress-basic-auth
+        image: neotkm/pod-healthcheck:v0.05
+        env:
+          - name: PORT
+            value: "2020"
+          - name: MESSAGE
+            value: "demo-svc-external-ips-2"
